@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #define N 5
+#define INF 999
 
 int graph[N][N]={
     {0,2,0,1,0},
@@ -11,45 +12,48 @@ int graph[N][N]={
 };
 
 int h[N]={7,6,2,1,0};
-
-int visited[N];
+int visited[N]={0};
 
 void Astar(int start,int goal){
 
-    int g[N]={0};
-    int f[N];
+    int g[N], f[N];
 
-    for(int i=0;i<N;i++)
-        f[i]=999;
+    for(int i=0;i<N;i++){
+        g[i] = INF;
+        f[i] = INF;
+    }
 
-    f[start]=h[start];
+    g[start] = 0;
+    f[start] = h[start];
 
     while(1){
-        int min=999, cur=-1;
+        int min = INF, cur = -1;
 
-        for(int i=0;i<N;i++)
-            if(!visited[i] && f[i]<min){
-                min=f[i];
-                cur=i;
+        for(int i=0;i<N;i++){
+            if(!visited[i] && f[i] < min){
+                min = f[i];
+                cur = i;
             }
+        }
 
-        if(cur==-1) break;
+        if(cur == -1) break;
 
-        printf("Visited node: %d\n",cur);
+        printf("Visited node: %d (f=%d)\n",cur,f[cur]);
 
-        if(cur==goal){
+        if(cur == goal){
             printf("Goal reached!\n");
             return;
         }
 
-        visited[cur]=1;
+        visited[cur] = 1;
 
         for(int i=0;i<N;i++){
             if(graph[cur][i]){
                 int cost = g[cur] + graph[cur][i];
-                if(cost < g[i] || g[i]==0){
-                    g[i]=cost;
-                    f[i]=g[i]+h[i];
+
+                if(cost < g[i]){
+                    g[i] = cost;
+                    f[i] = g[i] + h[i];
                 }
             }
         }
