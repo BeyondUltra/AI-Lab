@@ -6,7 +6,7 @@
 typedef struct{
     int mat[3][3];
     int x, y;
-    int h; // heuristic
+    int h;
 }State;
 
 State open[MAX];
@@ -20,12 +20,14 @@ int goal[3][3] = {
 
 int visited[MAX][9], vcount=0;
 
+// -------- COPY --------
 void copy(int a[3][3], int b[3][3]){
     for(int i=0;i<3;i++)
         for(int j=0;j<3;j++)
             b[i][j]=a[i][j];
 }
 
+// -------- PRINT --------
 void print(int a[3][3]){
     printf("\n");
     for(int i=0;i<3;i++){
@@ -35,7 +37,7 @@ void print(int a[3][3]){
     }
 }
 
-// heuristic = misplaced tiles
+// -------- HEURISTIC --------
 int heuristic(int a[3][3]){
     int h=0;
     for(int i=0;i<3;i++)
@@ -45,25 +47,29 @@ int heuristic(int a[3][3]){
     return h;
 }
 
-// check visited
+// -------- VISITED CHECK --------
 int isVisited(int a[3][3]){
     for(int i=0;i<vcount;i++){
         int same=1;
         for(int j=0;j<9;j++){
-            if(visited[i][j] != a[j/3][j%3]) same=0;
+            if(visited[i][j] != a[j/3][j%3]){
+                same=0;
+                break;
+            }
         }
         if(same) return 1;
     }
     return 0;
 }
 
+// -------- MARK VISITED --------
 void markVisited(int a[3][3]){
     for(int i=0;i<9;i++)
         visited[vcount][i] = a[i/3][i%3];
     vcount++;
 }
 
-// insert in sorted order (small h first)
+// -------- INSERT (sorted by h ascending) --------
 void insert(State s){
     int i=size-1;
     while(i>=0 && open[i].h > s.h){
@@ -74,10 +80,16 @@ void insert(State s){
     size++;
 }
 
+// -------- FIXED POP --------
 State pop(){
-    return open[--size];
+    State s = open[0];
+    for(int i=0;i<size-1;i++)
+        open[i] = open[i+1];
+    size--;
+    return s;
 }
 
+// -------- BEST FIRST --------
 void BestFirst(int start[3][3], int x, int y){
 
     State first;
@@ -88,7 +100,10 @@ void BestFirst(int start[3][3], int x, int y){
     insert(first);
 
     while(size>0){
+
         State cur = pop();
+
+        if(isVisited(cur.mat)) continue;
 
         print(cur.mat);
 
@@ -114,7 +129,8 @@ void BestFirst(int start[3][3], int x, int y){
                 next.mat[cur.x][cur.y] = next.mat[nx][ny];
                 next.mat[nx][ny] = 0;
 
-                next.x=nx; next.y=ny;
+                next.x=nx;
+                next.y=ny;
                 next.h = heuristic(next.mat);
 
                 if(!isVisited(next.mat))
@@ -122,8 +138,11 @@ void BestFirst(int start[3][3], int x, int y){
             }
         }
     }
+
+    printf("No solution found\n");
 }
 
+// -------- MAIN --------
 int main(){
     int start[3][3]={{1,2,3},{4,0,6},{7,5,8}};
     BestFirst(start,1,1);
